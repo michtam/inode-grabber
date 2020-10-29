@@ -1,0 +1,10 @@
+[Unit]
+Description=iNode Grabber Service
+After=multi-user.target
+[Service]
+User=pi
+Type=idle
+ExecStart=/usr/bin/python /usr/local/bin/inode-grabber.py
+Restart=always
+[Install]
+WantedBy=multi-user.target
