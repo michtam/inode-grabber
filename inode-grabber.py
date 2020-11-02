@@ -9,9 +9,20 @@ from bleak import discover
 from influxdb import InfluxDBClient
 from datetime import datetime
 
+long_options = ["help", "mac", "config", "verbose"]
+short_options = "hvd:c:"
+
 input_mac="D0:CF:5E:03:93:16"
 
-client = InfluxDBClient(host='endpoint', port=8086, database='database')
+client = InfluxDBClient(host='nas.intra.lan', port=8086, database='black-hole')
+
+def main():
+
+    loop = asyncio.get_event_loop()
+    ble_device = loop.run_until_complete(scan())
+
+    e, p = decode_payload(ble_device)
+    timestamp = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
 
 async def scan():
 
@@ -48,27 +59,47 @@ def decode_payload(data):
     print("Power raw: " + str(power_int))
     print("Energy raw: " + str(energy_int))
     
+    timestamp = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+
     power = power_int / impulses_int * 60.0
+    print("Timestamp: " + str(timestamp))
     print("Current power: " + str(power) + " kW" )
     energy = energy_int / impulses_int
     print("Userd energy: " + str(energy) + " kWh")
 
     return(energy, power)
 
-def push_metric():
-
-    print("Nothing")
-
-def main():
-
-    loop = asyncio.get_event_loop()
-    ble_device = loop.run_until_complete(scan())
-
-    timestamp = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
-    e, p = decode_payload(ble_device)
-
-    push_metric(e,p,timestamp)
-
 if __name__ == "__main__":
     main()
     time.sleep(5)
+    
+def push_metric():
+
+    print("Nothing yet")
+#json_body_1 = [
+#    {
+#        "measurement": "power",
+#        "tags": {
+#            "location": "home"
+#        },
+#        "time": timestamp,
+#        "fields": {
+#            "value": power
+#        }
+#    }
+#]
+#
+#json_body_2 = [
+#    {
+#        "measurement": "energy",
+#        "tags": {
+#            "location": "home"
+#        },
+#        "time": timestamp,
+#        "fields": {
+#            "value": energy
+#        }
+#    }
+#]
+#client.write_points(json_body_1)
+#client.write_points(json_body_2)
